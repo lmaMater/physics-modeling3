@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фазовый портрет затухающих колебаний в LCR контуре</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #202124;
+            color: #fff;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .form-container {
+            width: 30%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        form {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        form label {
+            display: block;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        form input {
+            width: calc(100% - 10px);
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
+        }
+        button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.5s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #plots-container {
+            width: 70%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #plots {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Ввод параметров -->
+    <div class="form-container">
+        <h1>Параметры</h1>
+        <form id="paramsForm">
+            <label for="inductance">Индуктивность (Гн):</label>
+            <input type="number" step="0.01" min="0" id="inductance" value="1.0">
+            <br>
+            <label for="resistance">Сопротивление (Ом):</label>
+            <input type="number" step="0.01" min="0" id="resistance" value="1.0">
+            <br>
+            <label for="capacitance">Емкость конденсатора (Ф):</label>
+            <input type="number" step="0.01" min="0.01" id="capacitance" value="1.0">
+            <br>
+            <button onclick="updatePlots()">Обновить (Enter)</button>
+        </form>
+        <br>
+        <label for="timeRange">Время:</label>
+        <input type="range" min="1" max="1000" value="50" step="1" id="timeRange" onchange="updateTimeRange(this.value)">
+        <output for="timeRange" id="timeRangeValue">50</output>
+    </div>
+
+    <!-- Графики -->
+    <div id="plots-container">
+        <div id="plots"></div>
+    </div>
+</div>
+
+<script>
+    // Функция для обновления временного диапазона
+    function updateTimeRange(value) {
+        document.getElementById("timeRangeValue").value = value;
+        generatePhasePortrait(parseFloat(document.getElementById("inductance").value),
+                              parseFloat(document.getElementById("resistance").value),
+                              parseFloat(document.getElementById("capacitance").value),
+                              parseFloat(value));
+    }
+    
+    function updatePlots(event) {
+        if (event) event.preventDefault();
+        
+        const inductance = parseFloat(document.getElementById("inductance").value);
+        const resistance = parseFloat(document.getElementById("resistance").value);
+        const capacitance = parseFloat(document.getElementById("capacitance").value);
+        const timeRange = parseFloat(document.getElementById("timeRange").value);
+        
+        generatePhasePortrait(inductance, resistance, capacitance, timeRange);
+    }
+    
+    function generatePhasePortrait(inductance, resistance, capacitance, timeMax) {
+        const time = Array.from({length: timeMax * 100}, (_, i) => i / 100);
+
+        // Рассчитываем значения заряда (Q) и тока (I) для каждого момента времени
+        const charge = time.map(t => Math.exp(-resistance / (2 * inductance) * t) * Math.cos(Math.sqrt(1 / (inductance * capacitance) - Math.pow(resistance / (2 * inductance), 2)) * t));
+        const current = time.map(t => (Math.exp(-resistance / (2 * inductance) * t) / Math.sqrt(1 / (inductance * capacitance) - Math.pow(resistance / (2 * inductance), 2))) * Math.sin(Math.sqrt(1 / (inductance * capacitance) - Math.pow(resistance / (2 * inductance), 2)) * t));
+        
+        // Создаем фазовый портрет
+        const phasePlot = {
+            x: charge,
+            y: current,
+            mode: 'lines',
+            name: 'Фазовый портрет',
+            line: {color: '#fff'}
+        };
+
+        const layout = {
+            title: {
+                text: 'Фазовый портрет затухающих колебаний в LCR контуре',
+                font: {
+                    color: '#fff'
+                }
+            },
+            xaxis: {
+                title: 'Заряд (C)',
+                color: '#fff'
+            },
+            yaxis: {
+                title: 'Ток (A)',
+                color: '#fff'
+            },
+            plot_bgcolor: '#333',
+            paper_bgcolor: '#333'
+        };
+        
+        Plotly.newPlot('plots', [phasePlot], layout);
+    }
+    
+    document.getElementById("paramsForm").addEventListener("submit", updatePlots);
+    
+    generatePhasePortrait(1.0, 1.0, 1.0, 50);
+</script>
+
+</body>
+</html>
