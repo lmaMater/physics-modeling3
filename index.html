@@ -67,7 +67,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         #plots a {
-            color: #ffe500; /* Светло-желтый цвет */
+            color: #ffe500; // цвет ссылки
         }
     </style>
 </head>
@@ -91,8 +91,8 @@
         </form>
         <br>
         <label for="timeRange">Время:</label>
-        <input type="range" min="1" max="1000" value="50" step="1" id="timeRange" onchange="updateTimeRange(this.value)">
-        <output for="timeRange" id="timeRangeValue">50</output>
+        <input type="range" min="1" max="1000" value="100" step="1" id="timeRange" onchange="updateTimeRange(this.value)">
+        <output for="timeRange" id="timeRangeValue">100</output>
     </div>
 
     <!-- Графики -->
@@ -125,9 +125,9 @@
     function generatePhasePortrait(inductance, resistance, capacitance, timeMax) {
         const time = Array.from({length: timeMax * 100}, (_, i) => i / 100);
 
-        if (resistance > 2 * Math.sqrt(inductance / capacitance)) {
-            // Если выполняется условие R > 2sqrt(L/C), выводим сообщение
-            document.getElementById('plots').innerHTML = '<p>При R > 2sqrt(L/C) изменение заряда не является колебаниями. Такой разряд конденсатора называется <a href="https://spravochnick.ru/fizika/elektromagnitnye_kolebaniya/zatuhayuschie_kolebaniya_v_konture_i_ih_uravnenie/">апериодическим</a>.</p>';
+        if (resistance >= 2 * Math.sqrt(inductance / capacitance)) {
+            // Если выполняется условие R >= 2sqrt(L/C), выводим сообщение вместо графика
+            document.getElementById('plots').innerHTML = '<p>При R >= 2sqrt(L/C) изменение заряда не является колебаниями. Такой разряд конденсатора называется <a href="https://spravochnick.ru/fizika/elektromagnitnye_kolebaniya/zatuhayuschie_kolebaniya_v_konture_i_ih_uravnenie/">апериодическим</a>.</p>';
             return;
         }
 
@@ -168,7 +168,7 @@
     
     document.getElementById("paramsForm").addEventListener("submit", updatePlots);
     
-    generatePhasePortrait(1.0, 1.0, 1.0, 50);
+    generatePhasePortrait(1.0, 1.0, 1.0, 100);
 </script>
 
 </body>
