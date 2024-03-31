@@ -66,6 +66,9 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        #plots a {
+            color: #ffe500; /* Светло-желтый цвет */
+        }
     </style>
 </head>
 <body>
@@ -121,6 +124,12 @@
     
     function generatePhasePortrait(inductance, resistance, capacitance, timeMax) {
         const time = Array.from({length: timeMax * 100}, (_, i) => i / 100);
+
+        if (resistance > 2 * Math.sqrt(inductance / capacitance)) {
+            // Если выполняется условие R > 2sqrt(L/C), выводим сообщение
+            document.getElementById('plots').innerHTML = '<p>При R > 2sqrt(L/C) изменение заряда не является колебаниями. Такой разряд конденсатора называется <a href="https://spravochnick.ru/fizika/elektromagnitnye_kolebaniya/zatuhayuschie_kolebaniya_v_konture_i_ih_uravnenie/">апериодическим</a>.</p>';
+            return;
+        }
 
         // Рассчитываем значения заряда (Q) и тока (I) для каждого момента времени
         const charge = time.map(t => Math.exp(-resistance / (2 * inductance) * t) * Math.cos(Math.sqrt(1 / (inductance * capacitance) - Math.pow(resistance / (2 * inductance), 2)) * t));
